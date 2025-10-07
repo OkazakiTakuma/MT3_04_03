@@ -160,9 +160,10 @@ Matrix4x4 MakeIdentity4x4() {
 void MatrixScreenPrintf(int posX, int posY, const Matrix4x4& matrix, const char* label) {
 
 	Novice::ScreenPrintf(posX, posY, "%s", label);
-	for (int row = 0; row < 4; row++) {
-		for (int column = 0; column < 4; column++) {
-			Novice::ScreenPrintf(posX + column * kColumnWidth, 20 + posY + row * kRowHeight, "%6.02f", matrix.m[row][column]);
+
+	for (int column = 0; column < 4; column++) {
+		for (int row = 0; row < 4; row++) {
+			Novice::ScreenPrintf(posX + column * kColumnWidth, 20 + posY + row * kRowHeight, "%6.03f", matrix.m[column][row]);
 		}
 	}
 }
@@ -318,4 +319,20 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 
 	viewportMatrix.m[3][3] = 1.0f;
 	return viewportMatrix;
+}
+
+Matrix4x4 MakeRotateAxisAngleMatrix(const Vector3& axis, float angle) {
+	Matrix4x4 rotateAxisAngleMatrix = MakeIdentity4x4();
+	float cosA = std::cos(angle);
+	float sinA = std::sin(angle);
+	rotateAxisAngleMatrix.m[0][0] = cosA + (1 - cosA) * axis.x * axis.x;
+	rotateAxisAngleMatrix.m[0][1] = (1 - cosA) * axis.x * axis.y - sinA * axis.z;
+	rotateAxisAngleMatrix.m[0][2] = (1 - cosA) * axis.x * axis.z + sinA * axis.y;
+	rotateAxisAngleMatrix.m[1][0] = (1 - cosA) * axis.y * axis.x + sinA * axis.z;
+	rotateAxisAngleMatrix.m[1][1] = cosA + (1 - cosA) * axis.y * axis.y;
+	rotateAxisAngleMatrix.m[1][2] = (1 - cosA) * axis.y * axis.z - sinA * axis.x;
+	rotateAxisAngleMatrix.m[2][0] = (1 - cosA) * axis.z * axis.x - sinA * axis.y;
+	rotateAxisAngleMatrix.m[2][1] = (1 - cosA) * axis.z * axis.y + sinA * axis.x;
+	rotateAxisAngleMatrix.m[2][2] = cosA + (1 - cosA) * axis.z * axis.z;
+	return rotateAxisAngleMatrix;
 }

@@ -118,6 +118,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			pos.z = conicalPendulum.anchor.z - radius * std::cos(conicalPendulum.angle);
 		}
 
+		Vector3 axus = Normalize({1.0f, 1.0f, 1.0f});
+		float angle = 0.44f;
+		Matrix4x4 rotateMatrix = MakeRotateAxisAngleMatrix(axus, angle);
+
+
 		// 衝突判定
 		// 球とOBBの衝突判定
 
@@ -131,19 +136,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
-		ImGui::Begin("window");
-		ImGui::DragFloat3("Camera Position", &cameraPosition.x, 0.1f);
-		ImGui::DragFloat3("Camera Rotate", &cameraRotate.x, 0.1f);
-
-		ImGui::Text("Press Space Move Spring");
-
-		ImGui::End();
-
 		// VectorScreenPrintf(-20, 0, cross, "Cross");
 		DrawGrid(wvpMatrix, viewPortMatrix);
 		Sphere sphere;
 		sphere.center = pos;
 		sphere.radius = 0.05f;
+		ImGui::Begin("window");
+		ImGui::DragFloat3("Camera Position", &cameraPosition.x, 0.1f);
+		ImGui::DragFloat3("Camera Rotate", &cameraRotate.x, 0.1f);
+		ImGui::DragFloat3("Item Rotate", &rotate.x, 0.1f);
+
+		ImGui::Text("Press Space Move Spring");
+
+		ImGui::End();
+
 		// 球の描画
 		DrawSphere(sphere, wvpMatrix, viewPortMatrix, 0xFFFFFFFF);
 		// 振り子の描画
@@ -152,7 +158,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		segment.diff = pos - conicalPendulum.anchor;
 		DrawSegment(segment, wvpMatrix, viewPortMatrix, 0xFFFFFFFF);
 
-
+		MatrixScreenPrintf(0, 0, rotateMatrix, "rotateMatrix");
 		///
 		/// ↑描画処理ここまで
 		///
