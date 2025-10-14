@@ -82,3 +82,5 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 
 
 Matrix4x4 MakeRotateAxisAngleMatrix(const Vector3& axis, float angle);
+
+Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to);

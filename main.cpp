@@ -18,31 +18,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// ライブラリの初期化
 	Novice::Initialize(kWindowTitle, kWindowsWidth, kWindowsHeight);
-	Vector3 translate = {0.0f, 0.0f, 0.0f};
-	Vector3 cameraPosition = {0.0f, 2.500f, -3.600f};
-	Vector3 cameraRotate = {0.7f, 0.0f, 0.0f};
-	Vector3 rotate{0.0f, 0.0f, 0.0f};
-
-	ConicalPendulum conicalPendulum;
-	conicalPendulum.anchor = {0.0f, 1.0f, 0.0f};
-	conicalPendulum.length = 0.8f;
-	conicalPendulum.harfApexAngle = 0.7f;   // 円錐振り子の頂角の半分
-	conicalPendulum.angle = 0.0f;           // 初期角度
-	conicalPendulum.angularVelocity = 0.0f; // 初期角速度
-
-	Vector3 pos{};
-
-	float deltaTime = 1.0f / 60.0f;
-	// 衝突判定の結果を受け取る箱
+	Vector3 from0 = Normalize(Vector3{1.0f, 0.7f, 0.5f});
+	Vector3 to0 = -from0;
+	Vector3 from1 = Normalize(Vector3{-0.6f, 0.9f, 0.2f});
+	Vector3 to1 = Normalize(Vector3{0.4f, 0.7f, -0.5f});
+	
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
 	char preKeys[256] = {0};
 	int mousePosX = 0;
 	int mousePosY = 0;
-	int triggerMousePosX = 0;
-	int triggerMousePosY = 0;
-
-	bool movingFlag = false; // スプリングの状態を管理するフラグ
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -53,80 +38,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		memcpy(preKeys, keys, 256);
 		Novice::GetHitKeyStateAll(keys);
 		Novice::GetMousePosition(&mousePosX, &mousePosY);
-		cameraPosition.z += Novice::GetWheel() / 100.0f;
 
-		if (keys[DIK_LSHIFT]) {
-			if (Novice::IsPressMouse(0)) {
-				if (mousePosX - triggerMousePosX > 10) {
-					cameraRotate.y -= 0.01f;
-				} else if (mousePosX - triggerMousePosX < 0) { // 修正: -0 を 0 に
-					cameraRotate.y += 0.01f;
-				}
-
-				if (mousePosY - triggerMousePosY > 10) {
-					cameraRotate.x -= 0.01f;
-				} else if (mousePosY - triggerMousePosY < -10) { // 修正: mousePosX → mousePosY
-					cameraRotate.x += 0.01f;
-				}
-			} else {
-				triggerMousePosX = mousePosX;
-				triggerMousePosY = mousePosY;
-			}
-		}
 		///
 		/// ↓更新処理ここから
 		///
 
-		if (keys[DIK_R]) {
-			cameraRotate.x = 0.0f;
-			cameraRotate.y = 0.0f;
-		}
-		if (keys[DIK_SPACE] && !preKeys[DIK_SPACE]) {
-			if (movingFlag) {
-				movingFlag = false; // スプリングの状態をオフにする
-			} else {
-				movingFlag = true; // スプリングの状態をオンにする
-			}
-		}
-
-		if (keys[DIK_Q]) {
-		}
-		if (keys[DIK_E]) {
-		}
-		if (keys[DIK_UP]) {
-		}
-		if (keys[DIK_DOWN]) {
-		}
-		if (keys[DIK_LEFT]) {
-		}
-		if (keys[DIK_RIGHT]) {
-		}
-		Matrix4x4 worldMatrix = MakeAffineMatrix(Vector3{1.0f, 1.0f, 1.0f}, rotate, translate);
-		Matrix4x4 cameraMatrix = MakeAffineMatrix(Vector3{1.0f, 1.0f, 1.0f}, cameraRotate, cameraPosition);
-		Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-		Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kWindowsWidth) / float(kWindowsHeight), 0.1f, 100.0f);
-		Matrix4x4 wvpMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
-		Matrix4x4 viewPortMatrix = MakeViewportMatrix(0, 0, float(kWindowsWidth), float(kWindowsHeight), 0.0f, 1.0f);
-		if (movingFlag) {
-			// 円錐振り子の位置を更新
-			conicalPendulum.angularVelocity = std::sqrt(9.8f / (conicalPendulum.length * std::cos(conicalPendulum.harfApexAngle)));
-			conicalPendulum.angle += conicalPendulum.angularVelocity * deltaTime;
-			float radius = conicalPendulum.length * std::sin(conicalPendulum.harfApexAngle);
-			float height = conicalPendulum.length * std::cos(conicalPendulum.harfApexAngle);
-			pos.x = conicalPendulum.anchor.x + radius * std::sin(conicalPendulum.angle);
-			pos.y = conicalPendulum.anchor.y - height;
-			pos.z = conicalPendulum.anchor.z - radius * std::cos(conicalPendulum.angle);
-		}
-
-		Vector3 axus = Normalize({1.0f, 1.0f, 1.0f});
-		float angle = 0.44f;
-		Matrix4x4 rotateMatrix = MakeRotateAxisAngleMatrix(axus, angle);
-
-
-		// 衝突判定
-		// 球とOBBの衝突判定
-
-		// 衝突判定
+		Matrix4x4 rotateMatrix0 = DirectionToDirection(Normalize(Vector3{1.0f, 0.0f, 0.0f}), Normalize(Vector3{-1.0f, 0.0f, 0.0f}));
+		Matrix4x4 rotateMatrix1 = DirectionToDirection(from0, to0);
+		Matrix4x4 rotateMatrix2 = DirectionToDirection(from1, to1);
 
 		///
 		/// ↑更新処理ここまで
@@ -136,29 +55,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
-		// VectorScreenPrintf(-20, 0, cross, "Cross");
-		DrawGrid(wvpMatrix, viewPortMatrix);
-		Sphere sphere;
-		sphere.center = pos;
-		sphere.radius = 0.05f;
-		ImGui::Begin("window");
-		ImGui::DragFloat3("Camera Position", &cameraPosition.x, 0.1f);
-		ImGui::DragFloat3("Camera Rotate", &cameraRotate.x, 0.1f);
-		ImGui::DragFloat3("Item Rotate", &rotate.x, 0.1f);
+		MatrixScreenPrintf(0, 0, rotateMatrix0, "RotateMatrix0");
+		MatrixScreenPrintf(0, 100, rotateMatrix1, "RotateMatrix1");
+		MatrixScreenPrintf(0, 200, rotateMatrix2, "RotateMatrix2");
 
-		ImGui::Text("Press Space Move Spring");
+		// VectorScreenPrintf(-20, 0, cross, "Cross");
+
+		ImGui::Begin("window");
 
 		ImGui::End();
 
-		// 球の描画
-		DrawSphere(sphere, wvpMatrix, viewPortMatrix, 0xFFFFFFFF);
-		// 振り子の描画
-		Segment segment;
-		segment.origin = conicalPendulum.anchor;
-		segment.diff = pos - conicalPendulum.anchor;
-		DrawSegment(segment, wvpMatrix, viewPortMatrix, 0xFFFFFFFF);
-
-		MatrixScreenPrintf(0, 0, rotateMatrix, "rotateMatrix");
 		///
 		/// ↑描画処理ここまで
 		///
