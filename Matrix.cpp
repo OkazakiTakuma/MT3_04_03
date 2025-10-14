@@ -160,9 +160,10 @@ Matrix4x4 MakeIdentity4x4() {
 void MatrixScreenPrintf(int posX, int posY, const Matrix4x4& matrix, const char* label) {
 
 	Novice::ScreenPrintf(posX, posY, "%s", label);
-	for (int row = 0; row < 4; row++) {
-		for (int column = 0; column < 4; column++) {
-			Novice::ScreenPrintf(posX + column * kColumnWidth, 20 + posY + row * kRowHeight, "%6.02f", matrix.m[row][column]);
+
+	for (int column = 0; column < 4; column++) {
+		for (int row = 0; row < 4; row++) {
+			Novice::ScreenPrintf(posX + column * kColumnWidth, 20 + posY + row * kRowHeight, "%6.03f", matrix.m[column][row]);
 		}
 	}
 }
@@ -318,4 +319,54 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 
 	viewportMatrix.m[3][3] = 1.0f;
 	return viewportMatrix;
+}
+
+Matrix4x4 MakeRotateAxisAngleMatrix(const Vector3& axis, float angle) {
+	Matrix4x4 rotateAxisAngleMatrix = MakeIdentity4x4();
+	float cosA = std::cos(angle);
+	float sinA = std::sin(angle);
+	rotateAxisAngleMatrix.m[0][0] = cosA + (1 - cosA) * axis.x * axis.x;
+	rotateAxisAngleMatrix.m[0][1] = (1 - cosA) * axis.x * axis.y - sinA * axis.z;
+	rotateAxisAngleMatrix.m[0][2] = (1 - cosA) * axis.x * axis.z + sinA * axis.y;
+	rotateAxisAngleMatrix.m[1][0] = (1 - cosA) * axis.y * axis.x + sinA * axis.z;
+	rotateAxisAngleMatrix.m[1][1] = cosA + (1 - cosA) * axis.y * axis.y;
+	rotateAxisAngleMatrix.m[1][2] = (1 - cosA) * axis.y * axis.z - sinA * axis.x;
+	rotateAxisAngleMatrix.m[2][0] = (1 - cosA) * axis.z * axis.x - sinA * axis.y;
+	rotateAxisAngleMatrix.m[2][1] = (1 - cosA) * axis.z * axis.y + sinA * axis.x;
+	rotateAxisAngleMatrix.m[2][2] = cosA + (1 - cosA) * axis.z * axis.z;
+	return rotateAxisAngleMatrix;
+}
+
+Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to) {
+	Matrix4x4 rotationMatrix = MakeIdentity4x4();
+	Vector3 U = from;
+	Vector3 V = to;
+	float cosTheta = Dot(U, V);
+	float sinTheta = sqrtf(Cross(U, V).x * Cross(U, V).x + Cross(U, V).y * Cross(U, V).y + Cross(U, V).z * Cross(U, V).z);
+
+	Vector3 N = Normalize(Cross(U, V));
+	/// 　反転行列かどうかを確認する
+	if (U.x == -V.x && U.y == -V.y && U.z == -V.z) {
+		if (U.x == 0.0f || U.y == 0.0f) {
+			N = Normalize({U.y, -U.x, 0.0f});
+		} else if (U.x == 0.0f || U.z == 0.0f) {
+			N = Normalize({U.z, 0.0f, -U.x});
+		} else if (U.y == 0.0f || U.z == 0.0f) {
+			N = Normalize({0.0f, U.z, -U.y});
+		} else {
+			N = Normalize({-U.y, U.x, 0.0f});
+		}
+	}
+
+	rotationMatrix.m[0][0] = cosTheta + (1 - cosTheta) * N.x * N.x;
+	rotationMatrix.m[0][1] = (1 - cosTheta) * N.x * N.y - sinTheta * N.z;
+	rotationMatrix.m[0][2] = (1 - cosTheta) * N.x * N.z + sinTheta * N.y;
+	rotationMatrix.m[1][0] = (1 - cosTheta) * N.y * N.x + sinTheta * N.z;
+	rotationMatrix.m[1][1] = cosTheta + (1 - cosTheta) * N.y * N.y;
+	rotationMatrix.m[1][2] = (1 - cosTheta) * N.y * N.z - sinTheta * N.x;
+	rotationMatrix.m[2][0] = (1 - cosTheta) * N.z * N.x - sinTheta * N.y;
+	rotationMatrix.m[2][1] = (1 - cosTheta) * N.z * N.y + sinTheta * N.x;
+	rotationMatrix.m[2][2] = cosTheta + (1 - cosTheta) * N.z * N.z;
+
+	return rotationMatrix;
 }

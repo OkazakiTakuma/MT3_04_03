@@ -78,3 +78,9 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip
 /// <param name="maxDepth">最大深度値</param>
 /// <returns></returns>
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDeapth, float maxDepth);
+
+
+
+Matrix4x4 MakeRotateAxisAngleMatrix(const Vector3& axis, float angle);
+
+Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to);
