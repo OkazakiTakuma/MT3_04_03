@@ -1,4 +1,6 @@
 #pragma once
+#include"Vector3.h"
+#include"Matrix.h"
 struct Quaternion {
 	float x, y, z, w;
 };
@@ -17,3 +19,9 @@ float Norm(const Quaternion& q);
 Quaternion Inverse(const Quaternion& q);
 
 void QuaternionScreenPrintf(int x, int y, const Quaternion& q, const char* label);
+
+Quaternion MakeRotateAxisAngleQuaternion(const Vector3 axis, const float angle);
+
+Vector3 RotateVector(const Vector3& v, const Quaternion& q);
+
+Matrix4x4 MakeRotateMatrix(const Quaternion& q);
