@@ -42,17 +42,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓更新処理ここから
 		///
-		Quaternion q1 = {2.0f, 3.0f, 4.0f, 1.0f};
-		Quaternion q2 = {1.0f, 3.0f, 5.0f, 2.0f};
-		Quaternion identity = IdentityQuaternion();
-		Quaternion conjugate = Conjugate(q1);
-		Quaternion normalize = Normalize(q1);
-		Quaternion inverse = Inverse(q1);
-		Quaternion multiply1 = Multiply(q1, q2);
-		Quaternion multiply2 = Multiply(q2, q1);
-		float norm = Norm(q1);
+		Quaternion rotation = MakeRotateAxisAngleQuaternion(Normalize(Vector3{1.0f,0.4f,-0.2f}),0.45f);
+		Vector3 point = {2.1f, -0.9f, 1.3f};
+		Matrix4x4 rotateMatrix = MakeRotateMatrix(rotation);
+		Vector3 rotateByQuaternion = RotateVector(point, rotation);
+		Vector3 rotateByMatrix = Transform(point, rotateMatrix);
 
-	
 		///
 		/// ↑更新処理ここまで
 		///
@@ -67,14 +62,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("window");
 
 		ImGui::End();
-		QuaternionScreenPrintf(0, 0, identity, "Identity");
-		QuaternionScreenPrintf(0, kRowHeight * 5, conjugate, "Conjugate");
-		QuaternionScreenPrintf(0, kRowHeight * 10, inverse, "Inverse");
-		QuaternionScreenPrintf(0, kRowHeight * 15, normalize, "Normalize");
-		QuaternionScreenPrintf(kColumnWidth * 5, 0, multiply1, "Multyply(q1, q2)");
-		QuaternionScreenPrintf(kColumnWidth * 5, kRowHeight * 5, multiply2, "Multyply(q2, q1)");
-		Novice::ScreenPrintf(kColumnWidth * 5, kRowHeight * 10, "Norm:%6.02f", norm);
+		QuaternionScreenPrintf(0, kRowHeight * 0, rotation, " : rotation");
+		MatrixScreenPrintf(0, kRowHeight * 6, rotateMatrix, " : rotateMatrix");
+		VectorScreenPrintf(0, kRowHeight * 11, rotateByQuaternion, " : rotateByQuaternion");
+		VectorScreenPrintf(0, kRowHeight * 12, rotateByMatrix, " : rotateByMatrix");
 
+		
 		///
 		/// ↑描画処理ここまで
 		///
