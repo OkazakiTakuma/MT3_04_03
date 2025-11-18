@@ -95,3 +95,37 @@ Matrix4x4 MakeRotateMatrix(const Quaternion& q) {
 	result.m[3][3] = 1.0f;
 	return result;
 }
+
+Quaternion Slerp(const Quaternion& q1, const Quaternion& q2, float t) {
+
+	float dot = q1.w * q2.w + q1.x * q2.x + q1.y * q2.y + q1.z * q2.z;
+	Quaternion q2Copy = q2;
+	if (dot < 0.0f) {
+		dot = -dot;
+		q2Copy.w = -q2Copy.w;
+		q2Copy.x = -q2Copy.x;
+		q2Copy.y = -q2Copy.y;
+		q2Copy.z = -q2Copy.z;
+	}
+	const float DOT_THRESHOLD = 0.9995f;
+	if (dot > DOT_THRESHOLD) {
+		Quaternion result;
+		result.w = (1 - t) * q1.w + t * q2Copy.w;
+		result.x = (1 - t) * q1.x + t * q2Copy.x;
+		result.y = (1 - t) * q1.y + t * q2Copy.y;
+		result.z = (1 - t) * q1.z + t * q2Copy.z;
+		return Normalize(result);
+	}
+	float theta_0 = acosf(dot);
+	float theta = theta_0 * t;
+	float sin_theta = sinf(theta);
+	float sin_theta_0 = sinf(theta_0);
+	float s0 = cosf(theta) - dot * sin_theta / sin_theta_0;
+	float s1 = sin_theta / sin_theta_0;
+	Quaternion result;
+	result.w = s0 * q1.w + s1 * q2Copy.w;
+	result.x = s0 * q1.x + s1 * q2Copy.x;
+	result.y = s0 * q1.y + s1 * q2Copy.y;
+	result.z = s0 * q1.z + s1 * q2Copy.z;
+	return result;
+}
